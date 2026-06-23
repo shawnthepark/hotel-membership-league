@@ -34,10 +34,13 @@ const state = {
   profile: loadProfile()
 };
 
+let profileRenderTimer = null;
+
 const els = {
   profileNameInput: document.querySelector("#profile-name-input"),
   saveProfileButton: document.querySelector("#save-profile-button"),
   statusGrid: document.querySelector("#status-grid"),
+  nextTierGrid: document.querySelector("#next-tier-grid"),
   tripCityInput: document.querySelector("#trip-city-input"),
   tripNightsInput: document.querySelector("#trip-nights-input"),
   tripPurposeInput: document.querySelector("#trip-purpose-input"),
@@ -61,6 +64,7 @@ const els = {
   scoreStrip: document.querySelector("#score-strip"),
   leagueGrid: document.querySelector("#league-grid"),
   ladderBoard: document.querySelector("#ladder-board"),
+  radarTabs: document.querySelector("#radar-tabs"),
   radarTitle: document.querySelector("#radar-title"),
   radarChart: document.querySelector("#radar-chart"),
   benefitBody: document.querySelector("#benefit-table tbody"),
@@ -116,6 +120,13 @@ function saveProfile() {
   localStorage.setItem(storageKey, JSON.stringify(state.profile));
 }
 
+function scheduleProfileRender() {
+  window.clearTimeout(profileRenderTimer);
+  profileRenderTimer = window.setTimeout(() => {
+    render();
+  }, 180);
+}
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -140,14 +151,14 @@ function currentScenario() {
 
 function qualifyingTier(program, nights = state.nights, rate = state.rate) {
   const annualSpend = nights * rate;
-  return [...program.tiers]
+  const eligibleTiers = program.tiers
     .filter((tier) => tier.name !== "Limitless")
     .filter((tier) => {
       const nightsOk = tier.nights === null || nights >= tier.nights;
       const spendOk = !tier.spend || annualSpend >= tier.spend;
       return nightsOk && spendOk;
-    })
-    .sort((a, b) => (b.nights || 999) - (a.nights || 999))[0] || program.tiers[0];
+    });
+  return eligibleTiers.at(-1) || program.tiers[0];
 }
 
 function currentTier(program) {
@@ -191,6 +202,10 @@ function statusFor(program) {
 
 function effectiveTier(program) {
   return tierByName(program, statusFor(program).tier);
+}
+
+function projectedNightsFor(program) {
+  return Number(statusFor(program).nights || 0) + Number(state.profile.trip.nights || 0);
 }
 
 function statusOptions(program) {
@@ -323,6 +338,50 @@ function tierBenefitScore(tier) {
   return score;
 }
 
+function tierRequirement(tier) {
+  if (tier.nights === null && tier.spend) return `${fmtMoney(tier.spend)}+`;
+  if (tier.nights === null) return "Invite";
+  if (tier.spend) return `${tier.nights}+${fmtMoney(tier.spend)}`;
+  return `${tier.nights}`;
+}
+
+function nextTierPath(program) {
+  const status = statusFor(program);
+  const currentNights = Number(status.nights || 0);
+  const projected = projectedNightsFor(program);
+  const tier = effectiveTier(program);
+  const next = nextTierFor(program, currentNights, state.rate, tier.name);
+  const maxNightTier = [...program.tiers].reverse().find((item) => item.nights !== null) || program.tiers.at(-1);
+  const maxNights = Math.max(maxNightTier?.nights || 100, 1);
+
+  if (!next) {
+    return {
+      next: null,
+      currentNights,
+      projected,
+      remainingNow: 0,
+      remainingAfterTrip: 0,
+      progress: 100,
+      copy: "현재 입력 기준 다음 체감 티어 없음"
+    };
+  }
+
+  const requiredNights = next.nights ?? maxNights;
+  const remainingNow = Math.max(requiredNights - currentNights, 0);
+  const remainingAfterTrip = Math.max(requiredNights - projected, 0);
+  const spendCopy = next.spend ? ` · ${fmtMoney(next.spend)} 조건 확인` : "";
+
+  return {
+    next,
+    currentNights,
+    projected,
+    remainingNow,
+    remainingAfterTrip,
+    progress: clamp(currentNights / requiredNights * 100, 0, 100),
+    copy: `${next.name}까지 ${remainingNow}박${spendCopy}`
+  };
+}
+
 function tripScore(program) {
   const tier = effectiveTier(program);
   const trip = state.profile.trip;
@@ -450,6 +509,8 @@ function renderLeague(scored) {
     const next = program.nextTier;
     const progress = Math.min(program.score / maxScore * 100, 100);
     const annualSpend = state.nights * state.rate;
+    const myTierLabel = statusFor(program).tier;
+    const simulationTier = program.currentTier.name;
     const nextCopy = next
       ? next.spend && annualSpend < next.spend
         ? `${next.name}까지 ${fmtMoney(next.spend - annualSpend)} 지출 필요`
@@ -470,8 +531,8 @@ function renderLeague(scored) {
         </div>
         <div class="bar-track"><div class="bar-fill" style="width:${progress}%;background:${program.color}"></div></div>
         <div class="mini-stats">
-          <span>현재 ${program.currentTier.name}</span>
-          <span>${nextCopy}</span>
+          <span>내 현재: ${myTierLabel}</span>
+          <span>시뮬레이션: ${simulationTier} · ${nextCopy}</span>
         </div>
         <div class="tag-row">
           ${program.strengths.slice(0, 3).map((tag) => `<span>${tag}</span>`).join("")}
@@ -481,18 +542,48 @@ function renderLeague(scored) {
   }).join("");
 }
 
+function renderNextTierPath() {
+  els.nextTierGrid.innerHTML = programs.map((program) => {
+    const status = statusFor(program);
+    const path = nextTierPath(program);
+    const afterCopy = path.next
+      ? `출장 후 ${path.remainingAfterTrip}박 남음`
+      : `출장 후 ${path.projected}박`;
+    return `
+      <article class="next-tier-card" data-program="${program.id}">
+        <div class="next-tier-top">
+          <span class="brand-mark mini" style="background:${program.color}">${program.shortName.slice(0, 2).toUpperCase()}</span>
+          <div>
+            <strong>${program.shortName}</strong>
+            <small>${status.tier} · ${status.nights || 0}박</small>
+          </div>
+        </div>
+        <div class="next-tier-copy">${path.copy}</div>
+        <div class="bar-track thin"><div class="bar-fill" style="width:${path.progress}%;background:${program.color}"></div></div>
+        <div class="next-tier-foot">
+          <span>현재 ${path.currentNights}박</span>
+          <span>${afterCopy}</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
 function renderLadder(scored) {
   const maxNights = 100;
   els.ladderBoard.innerHTML = scored.map((program) => {
-    const annualSpend = state.nights * state.rate;
+    const status = statusFor(program);
+    const currentNights = Number(status.nights || 0);
+    const projected = projectedNightsFor(program);
+    const annualSpend = currentNights * state.rate;
     const tiers = program.tiers
       .filter((tier) => tier.nights !== null || tier.spend !== null)
       .map((tier) => {
         const position = tier.nights === null ? 100 : tier.nights / maxNights * 100;
-        const unlocked = (tier.nights === null || state.nights >= tier.nights) && (!tier.spend || annualSpend >= tier.spend);
+        const unlocked = (tier.nights === null || currentNights >= tier.nights) && (!tier.spend || annualSpend >= tier.spend);
         return `
           <div class="tier-dot ${unlocked ? "is-unlocked" : ""}" style="left:${position}%">
-            <span></span>
+            <span>${tierRequirement(tier)}</span>
             <small>${tier.name}</small>
           </div>
         `;
@@ -502,16 +593,29 @@ function renderLadder(scored) {
       <div class="ladder-row">
         <div class="ladder-name"><span class="dot" style="color:${program.color}"></span>${program.shortName}</div>
         <div class="ladder-line">
-          <div class="traveler-pin" style="left:${Math.min(state.nights / maxNights * 100, 100)}%"></div>
+          <div class="traveler-pin current" style="left:${Math.min(currentNights / maxNights * 100, 100)}%" title="현재 ${currentNights}박"></div>
+          <div class="traveler-pin projected" style="left:${Math.min(projected / maxNights * 100, 100)}%" title="출장 후 ${projected}박"></div>
           ${tiers}
+        </div>
+        <div class="ladder-meta">
+          <span>현재 ${currentNights}박</span>
+          <span>출장 후 ${projected}박</span>
         </div>
       </div>
     `;
   }).join("");
 }
 
+function renderRadarTabs() {
+  els.radarTabs.innerHTML = programs.map((program) => `
+    <button class="${program.id === state.selectedProgramId ? "is-active" : ""}" data-radar-program="${program.id}" style="--brand:${program.color}">
+      ${program.shortName}
+    </button>
+  `).join("");
+}
+
 function renderRadar(program) {
-  els.radarTitle.textContent = `${program.name} · ${program.currentTier?.name || currentTier(program).name}`;
+  els.radarTitle.textContent = `${program.name} · 내 현재 ${statusFor(program).tier}`;
   const center = { x: 210, y: 175 };
   const radius = 115;
   const radarCriteria = criteria.slice(0, 8);
@@ -733,6 +837,7 @@ function renderTripResults() {
 function render() {
   renderControls();
   renderStatusInputs();
+  renderNextTierPath();
   renderTripInputs();
   renderTripResults();
   const scored = scoredPrograms();
@@ -740,6 +845,7 @@ function render() {
   renderScoreStrip(scored);
   renderLeague(scored);
   renderLadder(scored);
+  renderRadarTabs();
   renderRadar(selected);
   renderBenefitTable(scored);
   renderHeatmap(scored);
@@ -767,12 +873,15 @@ function syncFromProfile(event) {
       ...statusFor(programs.find((program) => program.id === programId)),
       tier: tierControl.value
     };
+    saveProfile();
+    render();
+    return;
   }
   if (nightsControl) {
     const programId = nightsControl.dataset.profileNights;
     state.profile.statuses[programId] = {
       ...statusFor(programs.find((program) => program.id === programId)),
-      nights: Number(nightsControl.value)
+      nights: Math.max(Number(nightsControl.value) || 0, 0)
     };
   }
   if (pointsControl) {
@@ -783,7 +892,28 @@ function syncFromProfile(event) {
     };
   }
   saveProfile();
-  render();
+  scheduleProfileRender();
+}
+
+function syncProfileDraft(event) {
+  const nightsControl = event.target.closest("[data-profile-nights]");
+  const pointsControl = event.target.closest("[data-profile-points]");
+  if (nightsControl) {
+    const programId = nightsControl.dataset.profileNights;
+    state.profile.statuses[programId] = {
+      ...statusFor(programs.find((program) => program.id === programId)),
+      nights: Math.max(Number(nightsControl.value) || 0, 0)
+    };
+    saveProfile();
+  }
+  if (pointsControl) {
+    const programId = pointsControl.dataset.profilePoints;
+    state.profile.statuses[programId] = {
+      ...statusFor(programs.find((program) => program.id === programId)),
+      points: Math.max(Number(pointsControl.value) || 0, 0)
+    };
+    saveProfile();
+  }
 }
 
 function syncTrip() {
@@ -809,6 +939,7 @@ render();
   .forEach((control) => control.addEventListener("change", syncTrip));
 
 els.statusGrid.addEventListener("change", syncFromProfile);
+els.statusGrid.addEventListener("input", syncProfileDraft);
 els.saveProfileButton.addEventListener("click", () => {
   saveProfile();
   els.saveProfileButton.textContent = "Saved";
@@ -821,5 +952,27 @@ els.leagueGrid.addEventListener("click", (event) => {
   const card = event.target.closest("[data-program]");
   if (!card) return;
   state.selectedProgramId = card.dataset.program;
+  render();
+});
+
+els.statusGrid.addEventListener("click", (event) => {
+  if (event.target.closest("input, select, label")) return;
+  const card = event.target.closest("[data-status-program]");
+  if (!card) return;
+  state.selectedProgramId = card.dataset.statusProgram;
+  render();
+});
+
+els.nextTierGrid.addEventListener("click", (event) => {
+  const card = event.target.closest("[data-program]");
+  if (!card) return;
+  state.selectedProgramId = card.dataset.program;
+  render();
+});
+
+els.radarTabs.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-radar-program]");
+  if (!tab) return;
+  state.selectedProgramId = tab.dataset.radarProgram;
   render();
 });

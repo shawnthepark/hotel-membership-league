@@ -34,6 +34,14 @@
           </label>
 
           <div class="status-grid" id="status-grid"></div>
+
+          <div class="next-tier-panel">
+            <div class="section-subhead">
+              <h3>Next Tier Path</h3>
+              <span>My Status 기준</span>
+            </div>
+            <div class="next-tier-grid" id="next-tier-grid"></div>
+          </div>
         </article>
 
         <article class="panel trip-panel">
@@ -90,7 +98,7 @@
           <div class="panel-head">
             <div>
               <h2>Traveler Simulator</h2>
-              <p>내 여행 패턴으로 리그 순위를 다시 계산</p>
+              <p>내 현재 등급과 시뮬레이션 등급을 분리해서 보기</p>
             </div>
           </div>
 
@@ -138,7 +146,7 @@
           <div class="panel-head">
             <div>
               <h2>Elite Ladder</h2>
-              <p>현재 숙박 수에서 어느 티어까지 열리는지 보기</p>
+              <p>My Status 기준 현재 위치와 이번 여행 후 위치</p>
             </div>
           </div>
           <div class="ladder-board" id="ladder-board"></div>
@@ -151,6 +159,7 @@
               <p id="radar-title">프로그램을 선택하세요</p>
             </div>
           </div>
+          <div class="radar-tabs" id="radar-tabs" aria-label="Perk Radar brand selector"></div>
           <svg id="radar-chart" viewBox="0 0 420 360" role="img" aria-label="멤버십 혜택 레이더 차트"></svg>
         </article>
       </section>
@@ -162,6 +171,7 @@
               <h2>Benefit Matrix</h2>
               <p>상위 체감 혜택을 한 행에서 비교</p>
             </div>
+            <span class="reference-badge">Reference</span>
           </div>
           <div class="matrix-wrap">
             <table class="benefit-table" id="benefit-table">
@@ -185,8 +195,9 @@
           <div class="panel-head">
             <div>
               <h2>Fine Print Heatmap</h2>
-              <p>초록일수록 이해하기 쉽고 예외가 적음</p>
+              <p>프로필 입력과 무관한 정적 비교 점수</p>
             </div>
+            <span class="reference-badge">Reference</span>
           </div>
           <div class="heatmap" id="fineprint-heatmap"></div>
         </article>

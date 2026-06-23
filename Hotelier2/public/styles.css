@@ -205,6 +205,7 @@ input[type="number"] {
   display: grid;
   gap: 10px;
   padding: 11px;
+  cursor: pointer;
 }
 
 .status-head {
@@ -246,6 +247,89 @@ input[type="number"] {
   color: #0f766e;
   font-size: 12px;
   font-weight: 900;
+}
+
+.section-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 10px;
+}
+
+.section-subhead h3 {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.section-subhead span,
+.reference-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #475467;
+  background: #f7faf9;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.next-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.next-tier-card {
+  display: grid;
+  gap: 8px;
+  min-height: 142px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.next-tier-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.next-tier-top strong,
+.next-tier-top small {
+  display: block;
+}
+
+.next-tier-top strong {
+  font-size: 13px;
+}
+
+.next-tier-top small,
+.next-tier-copy,
+.next-tier-foot {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.next-tier-copy {
+  min-height: 28px;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.bar-track.thin {
+  height: 6px;
+  margin-top: 0;
+}
+
+.next-tier-foot {
+  display: grid;
+  gap: 4px;
 }
 
 .trip-badge,
@@ -630,20 +714,20 @@ input[type="number"] {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  grid-template-columns: minmax(0, 1.42fr) minmax(330px, 0.58fr);
   gap: 12px;
   margin-top: 12px;
 }
 
 .ladder-board {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   padding: 6px 0 8px;
 }
 
 .ladder-row {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr) 112px;
   align-items: center;
   gap: 12px;
 }
@@ -666,48 +750,100 @@ input[type="number"] {
 
 .ladder-line {
   position: relative;
-  height: 58px;
+  height: 68px;
   border-top: 4px solid #dfe7f0;
 }
 
 .traveler-pin {
   position: absolute;
-  top: -10px;
-  width: 3px;
-  height: 24px;
+  top: -14px;
+  width: 4px;
+  height: 32px;
   border-radius: 999px;
   background: #1f2937;
+  z-index: 3;
+}
+
+.traveler-pin::after {
+  content: "";
+}
+
+.traveler-pin.projected {
+  top: -8px;
+  height: 22px;
+  background: #94a3b8;
 }
 
 .tier-dot {
   position: absolute;
-  top: -12px;
+  top: -18px;
   transform: translateX(-50%);
 }
 
 .tier-dot span {
-  display: block;
-  width: 18px;
-  height: 18px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
   border: 3px solid #dfe7f0;
   border-radius: 50%;
   background: #fff;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 900;
 }
 
 .tier-dot.is-unlocked span {
   border-color: #0f766e;
   background: #0f766e;
+  color: #ffffff;
 }
 
 .tier-dot small {
   display: block;
-  width: 80px;
-  margin-top: 7px;
-  margin-left: -31px;
+  width: 92px;
+  margin-top: 6px;
+  margin-left: -29px;
   color: var(--muted);
   font-size: 10px;
   font-weight: 800;
   text-align: center;
+}
+
+.ladder-meta {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ladder-meta span:first-child {
+  color: var(--ink);
+}
+
+.radar-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.radar-tabs button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #475467;
+  background: #fbfcfe;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.radar-tabs button.is-active {
+  border-color: var(--brand);
+  color: #ffffff;
+  background: var(--brand);
 }
 
 #radar-chart {
@@ -855,6 +991,10 @@ input[type="number"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .next-tier-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .source-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -915,6 +1055,12 @@ input[type="number"] {
 
   .ladder-row {
     grid-template-columns: 86px minmax(0, 1fr);
+  }
+
+  .ladder-meta {
+    grid-column: 2;
+    grid-template-columns: repeat(2, max-content);
+    gap: 10px;
   }
 
   .tier-dot small {
