@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hotel Membership League</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Hotelier2</p>
+          <h1>Hotel Membership League</h1>
+          <p class="subcopy">Marriott, IHG, Hyatt, Hilton, Accor 멤버십을 여행자 관점으로 비교합니다.</p>
+        </div>
+        <div class="source-pill">Official pages checked 2026-06-23</div>
+      </section>
+
+      <section class="personal-grid">
+        <article class="panel profile-panel">
+          <div class="panel-head">
+            <div>
+              <h2>My Status</h2>
+              <p>보유 등급, 올해 숙박 수, 포인트 지갑</p>
+            </div>
+            <button class="primary-button" id="save-profile-button">Save</button>
+          </div>
+
+          <label class="control-block compact">
+            <span>Profile</span>
+            <input id="profile-name-input" type="text" value="Traveler">
+          </label>
+
+          <div class="status-grid" id="status-grid"></div>
+        </article>
+
+        <article class="panel trip-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Upcoming Trip</h2>
+              <p>이번 일정 기준 혜택 비교</p>
+            </div>
+            <div class="trip-badge" id="trip-badge">Shanghai · 3 nights</div>
+          </div>
+
+          <div class="trip-input-grid">
+            <label class="control-block compact">
+              <span>City</span>
+              <input id="trip-city-input" type="text" value="Shanghai">
+            </label>
+            <label class="control-block compact">
+              <span>Nights</span>
+              <input id="trip-nights-input" type="number" min="1" max="30" value="3">
+            </label>
+            <label class="control-block compact">
+              <span>Purpose</span>
+              <select id="trip-purpose-input">
+                <option value="business">Business</option>
+                <option value="family">Family</option>
+                <option value="luxury">Luxury</option>
+                <option value="points">Points run</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="toggles trip-toggles">
+            <label><input id="trip-breakfast-toggle" type="checkbox" checked> 조식</label>
+            <label><input id="trip-lounge-toggle" type="checkbox" checked> 라운지</label>
+            <label><input id="trip-upgrade-toggle" type="checkbox" checked> 업그레이드</label>
+            <label><input id="trip-checkout-toggle" type="checkbox" checked> Late checkout</label>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel trip-results-panel">
+        <div class="panel-head">
+          <div>
+            <h2>What I’ll Get</h2>
+            <p id="trip-summary">Shanghai 출장 3박 · 예상 혜택 가치 기준</p>
+          </div>
+          <div class="winner-pill" id="trip-winner">Best fit: -</div>
+        </div>
+        <div class="trip-result-grid" id="trip-result-grid"></div>
+      </section>
+
+      <section class="app-grid">
+        <aside class="panel simulator-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Traveler Simulator</h2>
+              <p>내 여행 패턴으로 리그 순위를 다시 계산</p>
+            </div>
+          </div>
+
+          <label class="control-block">
+            <span>연간 숙박 수 <strong id="nights-value">35박</strong></span>
+            <input id="nights-input" type="range" min="0" max="110" value="35" step="5">
+          </label>
+
+          <label class="control-block">
+            <span>평균 객실가 <strong id="rate-value">$220</strong></span>
+            <input id="rate-input" type="range" min="80" max="700" value="220" step="20">
+          </label>
+
+          <label class="control-block">
+            <span>주 여행 지역</span>
+            <select id="region-input">
+              <option value="global">Global mix</option>
+              <option value="us">US-heavy</option>
+              <option value="europe">Europe-heavy</option>
+              <option value="asia">Asia-Pacific</option>
+              <option value="luxury">Luxury aspirational</option>
+            </select>
+          </label>
+
+          <label class="control-block">
+            <span>리그 모드</span>
+            <select id="scenario-input"></select>
+          </label>
+
+          <div class="toggles">
+            <label><input id="breakfast-toggle" type="checkbox" checked> 조식 중요</label>
+            <label><input id="suite-toggle" type="checkbox"> 스위트 헌터</label>
+            <label><input id="simple-toggle" type="checkbox"> 예외 조항 싫음</label>
+          </div>
+        </aside>
+
+        <section class="league-column">
+          <section class="score-strip" id="score-strip"></section>
+          <section class="league-grid" id="league-grid"></section>
+        </section>
+      </section>
+
+      <section class="workspace">
+        <article class="panel ladder-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Elite Ladder</h2>
+              <p>현재 숙박 수에서 어느 티어까지 열리는지 보기</p>
+            </div>
+          </div>
+          <div class="ladder-board" id="ladder-board"></div>
+        </article>
+
+        <article class="panel radar-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Perk Radar</h2>
+              <p id="radar-title">프로그램을 선택하세요</p>
+            </div>
+          </div>
+          <svg id="radar-chart" viewBox="0 0 420 360" role="img" aria-label="멤버십 혜택 레이더 차트"></svg>
+        </article>
+      </section>
+
+      <section class="matrix-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Benefit Matrix</h2>
+              <p>상위 체감 혜택을 한 행에서 비교</p>
+            </div>
+          </div>
+          <div class="matrix-wrap">
+            <table class="benefit-table" id="benefit-table">
+              <thead>
+                <tr>
+                  <th>Program</th>
+                  <th>Sweet spot</th>
+                  <th>Breakfast</th>
+                  <th>Suite / Upgrade</th>
+                  <th>Lounge</th>
+                  <th>Late checkout</th>
+                  <th>Milestone</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Fine Print Heatmap</h2>
+              <p>초록일수록 이해하기 쉽고 예외가 적음</p>
+            </div>
+          </div>
+          <div class="heatmap" id="fineprint-heatmap"></div>
+        </article>
+      </section>
+
+      <section class="panel source-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Official Source Notes</h2>
+            <p>앱 안의 데이터는 공식 혜택 페이지를 사람이 읽어 모델링한 비교 데이터입니다.</p>
+          </div>
+        </div>
+        <div class="source-grid" id="source-grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
