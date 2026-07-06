@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hotel Membership Tracker</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Hotelier2</p>
+          <h1>Hotel Membership Tracker</h1>
+          <p class="subcopy" id="app-subcopy">나의 Marriott, IHG, Hyatt, Hilton, Accor 멤버십 현재 등급을 바탕으로 혜택 가득한 여행과 출장을 준비합니다.</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="language-toggle" id="language-toggle" aria-label="Language">
+            <button class="is-active" type="button" data-locale="ko" aria-pressed="true">KO</button>
+            <button type="button" data-locale="en" aria-pressed="false">EN</button>
+          </div>
+          <button class="secondary-button feedback-button" id="feedback-button" type="button">Feedback</button>
+          <div class="source-pill" id="source-pill">Official pages checked 2026-06-23</div>
+        </div>
+      </section>
+
+      <section class="personal-grid">
+        <article class="panel profile-panel">
+          <div class="panel-head">
+            <div>
+              <h2>My Status</h2>
+              <p>보유 등급, 올해 숙박 수, 포인트 지갑</p>
+            </div>
+            <div class="profile-actions">
+              <button class="secondary-button" id="guide-button" type="button">Privacy & Guide</button>
+              <button class="secondary-button" id="export-csv-button" type="button">Download CSV</button>
+              <button class="secondary-button" id="import-csv-button" type="button">Import CSV</button>
+              <button class="primary-button" id="save-profile-button">Save</button>
+            </div>
+          </div>
+
+          <label class="control-block compact profile-name-control">
+            <span>Profile</span>
+            <input id="profile-name-input" type="text" value="" placeholder="Traveler">
+          </label>
+
+          <div class="status-grid" id="status-grid"></div>
+
+          <div class="next-tier-panel">
+            <div class="section-subhead">
+              <h3>Next Tier Path</h3>
+              <span>My Status 기준</span>
+            </div>
+            <div class="next-tier-grid" id="next-tier-grid"></div>
+          </div>
+        </article>
+
+        <article class="panel tier-benefits-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Tier Benefits</h2>
+              <p>선택한 프로그램 기준 현재/다음 티어 혜택</p>
+            </div>
+            <div class="trip-badge" id="selected-benefit-badge">Hyatt</div>
+          </div>
+
+          <div class="tier-benefits-stack">
+            <section class="tier-benefit-block">
+              <div class="section-subhead compact-head">
+                <h3>Current Tier Benefits</h3>
+                <span id="current-tier-label">-</span>
+              </div>
+              <div class="benefit-chip-grid" id="current-tier-benefits"></div>
+            </section>
+
+            <section class="tier-benefit-block">
+              <div class="section-subhead compact-head">
+                <h3>Next Tier Benefits</h3>
+                <span id="next-tier-label">-</span>
+              </div>
+              <div class="benefit-chip-grid" id="next-tier-benefits"></div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section class="workspace ladder-workspace">
+        <article class="panel ladder-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Elite Ladder</h2>
+              <p>보유 티어와 올해 숙박 진행을 분리해서 보기</p>
+            </div>
+            <div class="ladder-legend" aria-label="Elite Ladder marker legend">
+              <span><i class="legend-owned"></i>보유 티어</span>
+              <span><i class="legend-annual"></i>올해 숙박</span>
+              <span><i class="legend-projected"></i>이번 여행 후</span>
+            </div>
+          </div>
+          <div class="ladder-board" id="ladder-board"></div>
+        </article>
+      </section>
+
+      <section class="trip-planner-grid">
+        <article class="panel trip-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Upcoming Trip</h2>
+              <p>이번 일정 기준 혜택 비교</p>
+            </div>
+            <div class="trip-badge" id="trip-badge">Trip blank</div>
+          </div>
+
+          <div class="trip-input-grid">
+            <label class="control-block compact">
+              <span>City</span>
+              <input id="trip-city-input" type="text" value="" placeholder="City">
+            </label>
+            <label class="control-block compact">
+              <span>Nights</span>
+              <input id="trip-nights-input" type="number" min="0" max="30" value="0">
+            </label>
+            <fieldset class="purpose-control">
+              <legend>Purpose</legend>
+              <input id="trip-purpose-input" type="hidden" value="business">
+              <div class="purpose-options" role="radiogroup" aria-describedby="purpose-description">
+                <label>
+                  <input type="radio" name="trip-purpose" value="business" data-trip-purpose-option checked>
+                  <span><strong>Business</strong><small>출장</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="trip-purpose" value="family" data-trip-purpose-option>
+                  <span><strong>Family</strong><small>가족</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="trip-purpose" value="luxury" data-trip-purpose-option>
+                  <span><strong>Luxury</strong><small>휴식</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="trip-purpose" value="points" data-trip-purpose-option>
+                  <span><strong>Points</strong><small>등급/포인트</small></span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="purpose-description" id="purpose-description">
+            여행 목적을 선택하면 비교 기준이 업데이트됩니다.
+          </div>
+
+          <div class="benefit-priority-head">
+            <h3>혜택 우선순위</h3>
+            <p>이번 여행에서 중요한 혜택만 켜두세요. 켜진 혜택은 What I’ll Get 점수와 예상 가치 계산에 반영됩니다.</p>
+          </div>
+
+          <div class="toggles trip-toggles benefit-toggle-row">
+            <label><input id="trip-breakfast-toggle" type="checkbox"><span>조식</span></label>
+            <label><input id="trip-lounge-toggle" type="checkbox"><span>라운지</span></label>
+            <label><input id="trip-upgrade-toggle" type="checkbox"><span>룸 업그레이드</span></label>
+            <label><input id="trip-checkout-toggle" type="checkbox"><span>Late checkout</span></label>
+          </div>
+
+          <div class="benefit-priority-note">
+            조식은 숙박일수 기준, late checkout은 마지막 날 기준으로 가치를 계산합니다.
+          </div>
+        </article>
+
+        <section class="panel trip-results-panel">
+          <div class="panel-head">
+            <div>
+              <h2>What I’ll Get</h2>
+              <p id="trip-summary">여행 정보를 입력하면 비교가 업데이트됩니다.</p>
+            </div>
+            <div class="winner-pill" id="trip-winner">Best fit: -</div>
+          </div>
+          <div class="trip-result-grid" id="trip-result-grid"></div>
+        </section>
+      </section>
+
+      <section class="section-break simulator-section-break">
+        <p class="eyebrow">Scenario Lab</p>
+        <h2>Travel Simulator</h2>
+        <p>숙박 수, 객실가, 여행 지역을 바꿔 전체 멤버십 리그를 따로 실험합니다.</p>
+      </section>
+
+      <section class="analysis-grid">
+        <aside class="panel simulator-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Traveler Simulator</h2>
+              <p>내 현재 등급과 시뮬레이션 등급을 분리해서 보기</p>
+            </div>
+          </div>
+
+          <label class="control-block">
+            <span>연간 숙박 수 <strong id="nights-value">0박</strong></span>
+            <input id="nights-input" type="range" min="0" max="110" value="0" step="5">
+          </label>
+
+          <label class="control-block">
+            <span>평균 객실가 <strong id="rate-value">$0</strong></span>
+            <input id="rate-input" type="range" min="0" max="700" value="0" step="20">
+          </label>
+
+          <label class="control-block">
+            <span>주 여행 지역</span>
+            <select id="region-input">
+              <option value="global">Global mix</option>
+              <option value="us">US-heavy</option>
+              <option value="europe">Europe-heavy</option>
+              <option value="asia">Asia-Pacific</option>
+              <option value="luxury">Luxury aspirational</option>
+            </select>
+          </label>
+
+          <label class="control-block">
+            <span>비교 관점</span>
+            <select id="scenario-input"></select>
+            <small class="control-hint">아래 리그와 레이더 점수에만 반영됩니다.</small>
+          </label>
+
+          <div class="toggles">
+            <label><input id="breakfast-toggle" type="checkbox"> 조식 중요</label>
+            <label><input id="suite-toggle" type="checkbox"> 스위트 헌터</label>
+            <label><input id="simple-toggle" type="checkbox"> 예외 조항 싫음</label>
+          </div>
+        </aside>
+
+        <article class="panel radar-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Perk Radar</h2>
+              <p id="radar-title">프로그램을 선택하세요</p>
+            </div>
+          </div>
+          <div class="radar-tabs" id="radar-tabs" aria-label="Perk Radar brand selector"></div>
+          <svg id="radar-chart" viewBox="0 0 420 360" role="img" aria-label="멤버십 혜택 레이더 차트"></svg>
+        </article>
+      </section>
+
+      <section class="league-column">
+        <section class="score-strip" id="score-strip"></section>
+        <section class="league-grid" id="league-grid"></section>
+      </section>
+
+      <section class="references-section" aria-label="References">
+        <div class="references-head">
+          <p class="eyebrow">References</p>
+          <h2>Benefits Matrix & Fine Print</h2>
+          <p>아래 표들은 프로필 입력과 무관한 정적 참고 자료입니다.</p>
+        </div>
+
+        <section class="matrix-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Benefit Matrix</h2>
+                <p>상위 체감 혜택을 한 행에서 비교</p>
+              </div>
+              <span class="reference-badge">Reference</span>
+            </div>
+            <div class="matrix-wrap">
+              <table class="benefit-table" id="benefit-table">
+                <thead>
+                  <tr>
+                    <th>Program</th>
+                    <th>Sweet spot</th>
+                    <th>Breakfast</th>
+                    <th>Suite / Upgrade</th>
+                    <th>Lounge</th>
+                    <th>Late checkout</th>
+                    <th>Milestone</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Fine Print Heatmap</h2>
+                <p>프로필 입력과 무관한 정적 비교 점수</p>
+              </div>
+              <span class="reference-badge">Reference</span>
+            </div>
+            <div class="heatmap" id="fineprint-heatmap"></div>
+          </article>
+        </section>
+
+        <section class="panel source-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Official Source Notes</h2>
+              <p>앱 안의 데이터는 공식 혜택 페이지를 사람이 읽어 모델링한 비교 데이터입니다.</p>
+            </div>
+          </div>
+          <div class="source-grid" id="source-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="guide-modal" hidden>
+      <section class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Traveler Notice</p>
+            <h2 id="guide-modal-title">Privacy & Guide</h2>
+          </div>
+          <button class="modal-close" id="guide-close-button" type="button" aria-label="Close">×</button>
+        </div>
+
+        <div class="guide-grid">
+          <article class="guide-card">
+            <span>Privacy</span>
+            <h3>이 브라우저에만 저장됩니다</h3>
+            <p>Profile, tier, 숙박 수, 포인트, 여행 조건은 localStorage에 저장됩니다. GitHub, 호텔, 외부 서버로 보내지 않습니다.</p>
+          </article>
+
+          <article class="guide-card">
+            <span>Using My Status</span>
+            <h3>입력하면 화면이 함께 바뀝니다</h3>
+            <p>현재/다음 티어 혜택, Next Tier Path, Elite Ladder, What I’ll Get에 바로 반영됩니다.</p>
+          </article>
+
+          <article class="guide-card">
+            <span>Trip Planning</span>
+            <h3>이번 여행 기준으로 비교합니다</h3>
+            <p>도시, 숙박일, 목적을 바꾸면 어떤 프로그램이 유리한지 다시 계산합니다.</p>
+          </article>
+
+          <article class="guide-card">
+            <span>Before Booking</span>
+            <h3>예약 전 공식 링크를 확인하세요</h3>
+            <p>조식, 라운지, 업그레이드, late checkout은 호텔·지역·객실 상황에 따라 달라질 수 있습니다.</p>
+          </article>
+        </div>
+
+        <div class="modal-note">
+          공개 공유용 기본값은 빈 상태입니다. 이번 버전부터 이전 브라우저 저장값은 자동 초기화됩니다.
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="feedback-modal" hidden>
+      <section class="guide-modal feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Traveler Feedback</p>
+            <h2 id="feedback-modal-title">Feedback</h2>
+          </div>
+          <button class="modal-close" id="feedback-close-button" type="button" aria-label="Close">×</button>
+        </div>
+
+        <div class="feedback-layout">
+          <aside class="privacy-summary" aria-label="Feedback privacy summary">
+            <span>Privacy-aware</span>
+            <h3>프로필 정보는 자동 전송되지 않습니다</h3>
+            <p>이름, 티어, 포인트, 숙박 수, 여행 계획은 이 브라우저에 남아 있습니다. 피드백에는 사용자가 직접 쓴 내용만 담기도록 설계합니다.</p>
+            <ul>
+              <li>등급/포인트 자동 첨부 없음</li>
+              <li>브라우저 localStorage와 분리</li>
+              <li>외부 폼 연결 전 사전 고지</li>
+            </ul>
+          </aside>
+
+          <div class="feedback-form" aria-label="Feedback form link">
+            <div>
+              <span class="form-kicker">Google Form</span>
+              <h3>피드백은 새 탭에서 작성합니다</h3>
+              <p>앱 안의 Profile, tier, 포인트, 숙박 수는 자동으로 옮겨지지 않습니다. 폼에 직접 적은 내용만 제출됩니다.</p>
+            </div>
+
+            <a class="primary-button feedback-form-link" id="feedback-form-link" href="https://forms.gle/BfnMkCwccsCWBasM6" target="_blank" rel="noreferrer">Open form</a>
+          </div>
+        </div>
+
+        <div class="modal-note">
+          외부 Google Form을 앱 안에 직접 넣지 않고 새 탭에서 엽니다. 현재 멤버십 정보와 여행 조건이 폼에 자동 첨부되지 않도록 하기 위해서입니다.
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="csv-import-modal" hidden>
+      <section class="guide-modal csv-import-modal" role="dialog" aria-modal="true" aria-labelledby="csv-import-modal-title">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">My Status Backup</p>
+            <h2 id="csv-import-modal-title">Import CSV</h2>
+          </div>
+          <button class="modal-close" id="csv-import-close-button" type="button" aria-label="Close">×</button>
+        </div>
+
+        <div class="csv-import-layout">
+          <aside class="privacy-summary" aria-label="CSV import privacy summary">
+            <span>Local only</span>
+            <h3>CSV는 이 브라우저에서만 읽습니다</h3>
+            <p>선택한 파일은 서버나 GitHub로 업로드되지 않습니다. Import를 누르기 전 미리보기에서 내용을 확인합니다.</p>
+            <ul>
+              <li>Profile name, tier, 숙박 수, 포인트만 사용</li>
+              <li>알 수 없는 tier는 적용 전 경고</li>
+              <li>취소하면 현재 My Status 유지</li>
+            </ul>
+          </aside>
+
+          <div class="csv-import-panel">
+            <label class="csv-file-picker">
+              <span>CSV file</span>
+              <input id="csv-file-input" type="file" accept=".csv,text/csv">
+              <strong id="csv-file-name">No file selected</strong>
+            </label>
+
+            <div class="csv-import-status" id="csv-import-status">
+              CSV 파일을 선택하면 미리보기가 표시됩니다.
+            </div>
+
+            <div class="csv-preview-wrap" id="csv-preview-wrap" hidden>
+              <table class="csv-preview-table">
+                <thead>
+                  <tr>
+                    <th>Hotel</th>
+                    <th>Tier</th>
+                    <th>YTD nights</th>
+                    <th>Points</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="csv-preview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-note">
+          Download CSV로 만든 파일 형식을 기준으로 합니다. 없는 호텔 행은 현재 값이 유지됩니다.
+        </div>
+
+        <div class="csv-import-actions">
+          <button class="secondary-button" id="csv-import-cancel-button" type="button">Cancel</button>
+          <button class="primary-button" id="csv-import-apply-button" type="button" disabled>Import</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
