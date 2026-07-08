@@ -1490,6 +1490,101 @@ input[type="number"] {
   font-size: 14px;
 }
 
+.point-expiration-panel {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.expiration-table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.expiration-table th,
+.expiration-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.expiration-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.expiration-table td {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.42;
+}
+
+.expiration-table td:first-child {
+  width: 210px;
+}
+
+.expiration-table td:nth-child(2) {
+  width: 190px;
+}
+
+.expiration-table td:nth-child(3) {
+  width: 220px;
+}
+
+.expiration-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.brand-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.brand-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border-radius: 50%;
+}
+
+.marriott-dot {
+  background: var(--marriott);
+}
+
+.ihg-dot {
+  background: var(--ihg);
+}
+
+.hyatt-dot {
+  background: var(--hyatt);
+}
+
+.hilton-dot {
+  background: var(--hilton);
+}
+
+.accor-dot {
+  background: var(--accor);
+}
+
+.reference-note {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 8px;
+  color: #475467;
+  background: rgba(15, 118, 110, 0.06);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .matrix-wrap {
   overflow-x: auto;
 }
